@@ -1,0 +1,39 @@
+{
+  "name": "conversiontools",
+  "version": "1.0.0",
+  "description": "JavaScript library to convert files using Conversion Tools API at https://conversiontools.io",
+  "keywords": [
+    "conversion",
+    "tools",
+    "convert",
+    "document",
+    "file",
+    "api",
+    "sdk",
+    "client"
+  ],
+  "homepage": "https://github.com/conversiontools/conversiontools-node#readme",
+  "bugs": {
+    "url" : "https://github.com/conversiontools/conversiontools-node/issues",
+    "email" : "info@conversiontools.io"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/conversiontools/conversiontools-node.git"
+  },
+  "scripts": {
+    "test": "exit"
+  },
+  "dependencies": {
+    "form-data": "^2.3.3",
+    "node-fetch": "^2.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=8.11.*"
+  }
+}
