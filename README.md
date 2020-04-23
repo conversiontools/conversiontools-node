@@ -1,8 +1,8 @@
 # [Conversion Tools](https://conversiontools.io) API Node.js Client
 
-[Conversion Tools](https://conversiontools.io) is an online service which offers fast and easy way to convert documents between different formats, like XML, Excel, PDF, Word, Text, CSV and others.
+[Conversion Tools](https://conversiontools.io) is an online service that offers a fast and easy way to convert documents between different formats, like XML, Excel, PDF, Word, Text, CSV and others.
 
-This Node.js Client allows to integrate the conversion of the files into your node.js applications. To convert the files Node.js Client uses the public [Conversion Tools REST API](https://conversiontools.io/api_documentation).
+This Node.js Client allows integrating the conversion of the files into your node.js applications. To convert the files Node.js Client uses the public [Conversion Tools REST API](https://conversiontools.io/api-documentation).
 
 ## Installation
 
@@ -47,10 +47,10 @@ conversion
 
 ## Documentation
 
-List of available Conversion Types and corresponding conversion options can be found on the [Conversion Tools API Documentation](https://conversiontools.io/api_documentation) page.
+List of available Conversion Types and corresponding conversion options can be found on the [Conversion Tools API Documentation](https://conversiontools.io/api-documentation) page.
 
 ## License
 
 Licensed under [MIT](./LICENSE).
 
-Copyright (c) 2018 [Conversion Tools](https://conversiontools.io)
+Copyright (c) 2020 [Conversion Tools](https://conversiontools.io)
