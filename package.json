@@ -14,24 +14,24 @@
   ],
   "homepage": "https://github.com/conversiontools/conversiontools-node#readme",
   "bugs": {
-    "url" : "https://github.com/conversiontools/conversiontools-node/issues",
-    "email" : "info@conversiontools.io"
+    "url": "https://github.com/conversiontools/conversiontools-node/issues",
+    "email": "info@conversiontools.io"
   },
   "license": "MIT",
   "main": "index.js",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/conversiontools/conversiontools-node.git"
+    "type": "git",
+    "url": "https://github.com/conversiontools/conversiontools-node.git"
   },
   "scripts": {
     "test": "exit"
   },
   "dependencies": {
-    "form-data": "^2.3.3",
-    "node-fetch": "^2.2.1"
+    "form-data": "^3.0.0",
+    "node-fetch": "^2.6.0"
   },
   "devDependencies": {
-    "eslint": "^5.9.0"
+    "eslint": "^6.8.0"
   },
   "engines": {
     "node": ">=8.11.*"
