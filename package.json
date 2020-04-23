@@ -1,6 +1,6 @@
 {
   "name": "conversiontools",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "JavaScript library to convert files using Conversion Tools API at https://conversiontools.io",
   "keywords": [
     "conversion",
