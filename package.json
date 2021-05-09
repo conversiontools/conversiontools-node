@@ -1,6 +1,6 @@
 {
   "name": "conversiontools",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "JavaScript library to convert files using Conversion Tools API at https://conversiontools.io",
   "keywords": [
     "conversion",
@@ -27,11 +27,11 @@
     "test": "exit"
   },
   "dependencies": {
-    "form-data": "^3.0.0",
-    "node-fetch": "^2.6.0"
+    "form-data": "^4.0.0",
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
-    "eslint": "^6.8.0"
+    "eslint": "^7.26.0"
   },
   "engines": {
     "node": ">=8.11.*"
