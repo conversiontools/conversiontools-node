@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <test id="1">
+    <name>Test Case 1</name>
+    <description>Sample test XML structure</description>
+    <status>pass</status>
+  </test>
+  <test id="2">
+    <name>Test Case 2</name>
+    <description>Another sample test</description>
+    <status>pass</status>
+  </test>
+</root>

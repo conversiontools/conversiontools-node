@@ -1,7 +1,7 @@
 {
   "name": "conversiontools",
-  "version": "1.0.3",
-  "description": "JavaScript library to convert files using Conversion Tools API at https://conversiontools.io",
+  "version": "2.0.0",
+  "description": "Modern TypeScript/JavaScript library to convert files using Conversion Tools API at https://conversiontools.io - supports ESM & CommonJS with full TypeScript types",
   "keywords": [
     "conversion",
     "tools",
@@ -10,7 +10,13 @@
     "file",
     "api",
     "sdk",
-    "client"
+    "client",
+    "typescript",
+    "xml",
+    "json",
+    "excel",
+    "pdf",
+    "csv"
   ],
   "homepage": "https://github.com/conversiontools/conversiontools-node#readme",
   "bugs": {
@@ -18,22 +24,61 @@
     "email": "info@conversiontools.io"
   },
   "license": "MIT",
-  "main": "index.js",
+  "author": "Conversion Tools <info@conversiontools.io>",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./legacy": {
+      "import": {
+        "types": "./dist/legacy.d.ts",
+        "default": "./dist/legacy.js"
+      },
+      "require": {
+        "types": "./dist/legacy.d.cts",
+        "default": "./dist/legacy.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/conversiontools/conversiontools-node.git"
   },
   "scripts": {
-    "test": "exit"
-  },
-  "dependencies": {
-    "form-data": "^4.0.0",
-    "node-fetch": "^2.6.1"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run typecheck && npm run build"
   },
   "devDependencies": {
-    "eslint": "^7.26.0"
+    "@types/node": "^24.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "eslint": "^9.39.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.8"
   },
   "engines": {
-    "node": ">=8.11.*"
+    "node": ">=18.0.0"
   }
 }
