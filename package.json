@@ -1,8 +1,9 @@
 {
   "name": "conversiontools",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Modern TypeScript/JavaScript library to convert files using Conversion Tools API at https://conversiontools.io - supports ESM & CommonJS with full TypeScript types",
   "keywords": [
+    "conversiontools",
     "conversion",
     "tools",
     "convert",
@@ -71,12 +72,12 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "@typescript-eslint/eslint-plugin": "^8.46.4",
-    "@typescript-eslint/parser": "^8.46.4",
+    "@typescript-eslint/eslint-plugin": "^8.48.0",
+    "@typescript-eslint/parser": "^8.48.0",
     "eslint": "^9.39.1",
     "tsup": "^8.5.1",
     "typescript": "^5.3.3",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.14"
   },
   "engines": {
     "node": ">=18.0.0"
