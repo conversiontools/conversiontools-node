@@ -1,6 +1,6 @@
 {
   "name": "conversiontools",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Modern TypeScript/JavaScript library to convert files using Conversion Tools API at https://conversiontools.io - supports ESM & CommonJS with full TypeScript types",
   "keywords": [
     "conversiontools",
