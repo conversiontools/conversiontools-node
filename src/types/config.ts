@@ -37,6 +37,9 @@ export interface ConversionToolsConfig {
   /** Webhook URL for task completion notifications */
   webhookUrl?: string;
 
+  /** UserAgent string for HTTP requests */
+  userAgent?: string;
+
   /** Upload progress callback */
   onUploadProgress?: (progress: ProgressEvent) => void;
 

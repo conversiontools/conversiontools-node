@@ -58,6 +58,7 @@ export class ConversionToolsClient {
       maxPollingInterval: config.maxPollingInterval || 30000,
       pollingBackoff: config.pollingBackoff || 1.5,
       webhookUrl: config.webhookUrl,
+      userAgent: config.userAgent || `conversiontools-node/${VERSION}`,
       onUploadProgress: config.onUploadProgress,
       onDownloadProgress: config.onDownloadProgress,
       onConversionProgress: config.onConversionProgress,
@@ -71,7 +72,7 @@ export class ConversionToolsClient {
       retries: this.config.retries,
       retryDelay: this.config.retryDelay,
       retryableStatuses: this.config.retryableStatuses,
-      userAgent: `conversiontools-node/${VERSION}`,
+      userAgent: this.config.userAgent,
     });
 
     // Initialize API clients
