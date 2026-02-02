@@ -859,6 +859,7 @@ var ConversionToolsClient = class {
       maxPollingInterval: config.maxPollingInterval || 3e4,
       pollingBackoff: config.pollingBackoff || 1.5,
       webhookUrl: config.webhookUrl,
+      userAgent: config.userAgent || `conversiontools-node/${VERSION}`,
       onUploadProgress: config.onUploadProgress,
       onDownloadProgress: config.onDownloadProgress,
       onConversionProgress: config.onConversionProgress
@@ -870,7 +871,7 @@ var ConversionToolsClient = class {
       retries: this.config.retries,
       retryDelay: this.config.retryDelay,
       retryableStatuses: this.config.retryableStatuses,
-      userAgent: `conversiontools-node/${VERSION}`
+      userAgent: this.config.userAgent
     });
     this.files = new FilesAPI(this.http);
     this.tasks = new TasksAPI(this.http);
