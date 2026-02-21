@@ -849,7 +849,7 @@ var Task = class {
 };
 
 // src/client.ts
-var VERSION = "2.0.0";
+var VERSION = "2.0.3";
 var ConversionToolsClient = class {
   constructor(config) {
     validateApiToken(config.apiToken);

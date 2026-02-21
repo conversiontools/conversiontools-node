@@ -16,8 +16,9 @@ import { ConfigAPI } from './api/config.js';
 import { Task } from './models/Task.js';
 import { validateApiToken, validateConversionInput } from './utils/validation.js';
 
-// Package version (will be replaced during build)
-const VERSION = '2.0.0';
+// Injected at build time from package.json by tsup/vitest define
+declare const __VERSION__: string;
+const VERSION = __VERSION__;
 
 export class ConversionToolsClient {
   private readonly config: Required<
