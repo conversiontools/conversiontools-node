@@ -165,7 +165,7 @@ export class ConversionToolsClient {
     });
 
     // Download result
-    const outputPath = await task.downloadTo(output);
+    const outputPath = await task.downloadTo(output, this.config.onDownloadProgress);
 
     return outputPath;
   }

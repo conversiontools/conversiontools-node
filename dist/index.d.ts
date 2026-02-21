@@ -700,7 +700,7 @@ declare class FilesAPI {
     /**
      * Download file to path
      */
-    downloadTo(fileId: string, outputPath?: string): Promise<string>;
+    downloadTo(fileId: string, outputPath?: string, onProgress?: (progress: ProgressEvent) => void): Promise<string>;
 }
 
 /**
@@ -839,7 +839,7 @@ declare class Task {
     /**
      * Download result file to path
      */
-    downloadTo(outputPath?: string): Promise<string>;
+    downloadTo(outputPath?: string, onProgress?: (progress: ProgressEvent) => void): Promise<string>;
     /**
      * Update task state from API response
      */

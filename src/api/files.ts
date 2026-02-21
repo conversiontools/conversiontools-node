@@ -9,6 +9,7 @@ import type {
   FileUploadResponse,
   FileInfo,
   FileUploadOptions,
+  ProgressEvent,
 } from '../types/config.js';
 import { HttpClient } from './http.js';
 import { ValidationError } from '../utils/errors.js';
@@ -126,7 +127,11 @@ export class FilesAPI {
   /**
    * Download file to path
    */
-  async downloadTo(fileId: string, outputPath?: string): Promise<string> {
+  async downloadTo(
+    fileId: string,
+    outputPath?: string,
+    onProgress?: (progress: ProgressEvent) => void
+  ): Promise<string> {
     validateFileId(fileId);
 
     const response = await this.http.get<Response>(`/files/${encodeURIComponent(fileId)}`, {
@@ -160,7 +165,14 @@ export class FilesAPI {
       throw new ValidationError('No response body');
     }
 
-    const nodeStream = Readable.fromWeb(response.body);
+    const contentLength = response.headers.get('content-length');
+    const total = contentLength ? parseInt(contentLength, 10) : undefined;
+
+    let nodeStream: NodeJS.ReadableStream = Readable.fromWeb(response.body);
+    if (onProgress) {
+      nodeStream = trackStreamProgress(nodeStream, onProgress, total);
+    }
+
     const writeStream = fs.createWriteStream(filename);
 
     await new Promise<void>((resolve, reject) => {

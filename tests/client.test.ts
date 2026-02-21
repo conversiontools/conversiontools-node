@@ -89,8 +89,50 @@ describe('ConversionToolsClient', () => {
         onDownloadProgress,
         onConversionProgress,
       });
-      
+
       expect(client).toBeInstanceOf(ConversionToolsClient);
+    });
+
+    it('should pass onDownloadProgress to task.downloadTo via convert()', async () => {
+      const onDownloadProgress = vi.fn();
+      const client = new ConversionToolsClient({
+        apiToken: mockApiToken,
+        onDownloadProgress,
+      });
+
+      // Stub files.upload
+      const uploadSpy = vi.spyOn(client.files, 'upload').mockResolvedValue('a'.repeat(32));
+
+      // Stub tasks.create
+      const createSpy = vi.spyOn(client.tasks, 'create').mockResolvedValue({
+        error: null,
+        task_id: 'b'.repeat(32),
+      });
+
+      // Stub tasks.getStatus to return SUCCESS immediately
+      vi.spyOn(client.tasks, 'getStatus').mockResolvedValue({
+        error: null,
+        status: 'SUCCESS',
+        file_id: 'c'.repeat(32),
+        conversionProgress: 100,
+      });
+
+      // Stub files.downloadTo and capture the onProgress argument
+      let capturedOnProgress: ((p: any) => void) | undefined;
+      vi.spyOn(client.files, 'downloadTo').mockImplementation(
+        async (_fileId, _outputPath, onProgress) => {
+          capturedOnProgress = onProgress;
+          return 'output.csv';
+        }
+      );
+
+      await client.convert({
+        type: 'convert.xml_to_csv',
+        input: './test.xml',
+        output: 'output.csv',
+      });
+
+      expect(capturedOnProgress).toBe(onDownloadProgress);
     });
   });
 

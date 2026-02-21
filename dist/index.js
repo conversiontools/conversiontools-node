@@ -505,7 +505,7 @@ var FilesAPI = class {
   /**
    * Download file to path
    */
-  async downloadTo(fileId, outputPath) {
+  async downloadTo(fileId, outputPath, onProgress) {
     validateFileId(fileId);
     const response = await this.http.get(`/files/${encodeURIComponent(fileId)}`, {
       raw: true
@@ -530,7 +530,12 @@ var FilesAPI = class {
     if (!response.body) {
       throw new ValidationError("No response body");
     }
-    const nodeStream = Readable.fromWeb(response.body);
+    const contentLength = response.headers.get("content-length");
+    const total = contentLength ? parseInt(contentLength, 10) : void 0;
+    let nodeStream = Readable.fromWeb(response.body);
+    if (onProgress) {
+      nodeStream = trackStreamProgress(nodeStream, onProgress, total);
+    }
     const writeStream = fs.createWriteStream(filename);
     await new Promise((resolve, reject) => {
       nodeStream.pipe(writeStream);
@@ -787,14 +792,14 @@ var Task = class {
   /**
    * Download result file to path
    */
-  async downloadTo(outputPath) {
+  async downloadTo(outputPath, onProgress) {
     if (!this._fileId) {
       throw new ConversionError(
         "No result file available. Task may not be complete.",
         this.id
       );
     }
-    return this.filesAPI.downloadTo(this._fileId, outputPath);
+    return this.filesAPI.downloadTo(this._fileId, outputPath, onProgress);
   }
   /**
    * Update task state from API response
@@ -918,7 +923,7 @@ var ConversionToolsClient = class {
         }
       }
     });
-    const outputPath = await task.downloadTo(output);
+    const outputPath = await task.downloadTo(output, this.config.onDownloadProgress);
     return outputPath;
   }
   /**

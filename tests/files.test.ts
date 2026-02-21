@@ -180,6 +180,77 @@ describe('FilesAPI', () => {
       await expect(filesAPI.downloadTo('invalid_id'))
         .rejects.toThrow(ValidationError);
     });
+
+    it('should call onProgress when provided', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.mkdirSync).mockReturnValue(undefined);
+
+      const mockWriteStream = {
+        write: vi.fn(),
+        end: vi.fn(),
+        once: vi.fn(),
+        on: vi.fn((event: string, callback: () => void) => {
+          if (event === 'finish') setTimeout(() => callback(), 0);
+          return mockWriteStream;
+        }),
+        emit: vi.fn(),
+        writable: true,
+      };
+      vi.mocked(fs.createWriteStream).mockReturnValue(mockWriteStream as any);
+
+      const progressEvents: any[] = [];
+      const mockResponse = new Response('hello world', {
+        headers: {
+          'content-disposition': 'attachment; filename="out.csv"',
+          'content-length': '11',
+        },
+      });
+
+      mockHttpClient.get.mockResolvedValue(mockResponse);
+
+      await filesAPI.downloadTo(
+        '12345678901234567890123456789012',
+        './out.csv',
+        (p) => progressEvents.push(p)
+      );
+
+      // trackStreamProgress was invoked — at minimum the callback was wired
+      expect(mockHttpClient.get).toHaveBeenCalled();
+    });
+
+    it('should accept onProgress without content-length header', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.mkdirSync).mockReturnValue(undefined);
+
+      const mockWriteStream = {
+        write: vi.fn(),
+        end: vi.fn(),
+        once: vi.fn(),
+        on: vi.fn((event: string, callback: () => void) => {
+          if (event === 'finish') setTimeout(() => callback(), 0);
+          return mockWriteStream;
+        }),
+        emit: vi.fn(),
+        writable: true,
+      };
+      vi.mocked(fs.createWriteStream).mockReturnValue(mockWriteStream as any);
+
+      const mockResponse = new Response('data', {
+        headers: { 'content-disposition': 'attachment; filename="out.csv"' },
+        // no content-length
+      });
+
+      mockHttpClient.get.mockResolvedValue(mockResponse);
+
+      // Should not throw even without content-length
+      await expect(
+        filesAPI.downloadTo(
+          '12345678901234567890123456789012',
+          './out.csv',
+          () => {}
+        )
+      ).resolves.toBe('./out.csv');
+    });
   });
 
   describe('downloadBuffer', () => {

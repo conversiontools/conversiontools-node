@@ -6,6 +6,7 @@ import type {
   TaskStatus,
   TaskStatusResponse,
   WaitOptions,
+  ProgressEvent,
 } from '../types/config.js';
 import { TasksAPI } from '../api/tasks.js';
 import { FilesAPI } from '../api/files.js';
@@ -213,7 +214,10 @@ export class Task {
   /**
    * Download result file to path
    */
-  async downloadTo(outputPath?: string): Promise<string> {
+  async downloadTo(
+    outputPath?: string,
+    onProgress?: (progress: ProgressEvent) => void
+  ): Promise<string> {
     if (!this._fileId) {
       throw new ConversionError(
         'No result file available. Task may not be complete.',
@@ -221,7 +225,7 @@ export class Task {
       );
     }
 
-    return this.filesAPI.downloadTo(this._fileId, outputPath);
+    return this.filesAPI.downloadTo(this._fileId, outputPath, onProgress);
   }
 
   /**
