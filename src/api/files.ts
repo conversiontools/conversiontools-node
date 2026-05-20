@@ -2,6 +2,7 @@
  * Files API - Upload, download, and manage files
  */
 
+import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Readable } from 'stream';
@@ -20,7 +21,10 @@ export class FilesAPI {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * Upload a file from various sources
+   * Upload a file from various sources.
+   *
+   * Streams the upload chunked to the API — never buffers the entire file
+   * in memory. Safe for arbitrarily large inputs.
    */
   async upload(
     input: string | NodeJS.ReadableStream | Buffer,
@@ -57,25 +61,23 @@ export class FilesAPI {
       stream = trackStreamProgress(stream, options.onProgress, fileSize);
     }
 
-    // Create FormData for upload
-    const formData = new FormData();
+    // Build a streaming multipart/form-data body — chunk by chunk, no buffer
+    const boundary = `----conversiontools-${randomUUID()}`;
+    const head = Buffer.from(
+      `--${boundary}\r\n` +
+        `Content-Disposition: form-data; name="file"; filename="${sanitizeFilename(filename || 'file')}"\r\n` +
+        `Content-Type: application/octet-stream\r\n\r\n`,
+      'utf8'
+    );
+    const tail = Buffer.from(`\r\n--${boundary}--\r\n`, 'utf8');
 
-    // Convert Node stream to Web ReadableStream for FormData
-    const chunks: Uint8Array[] = [];
-    for await (const chunk of stream) {
-      if (typeof chunk === 'string') {
-        chunks.push(new TextEncoder().encode(chunk));
-      } else if (chunk instanceof Buffer) {
-        chunks.push(new Uint8Array(chunk));
-      } else {
-        chunks.push(chunk);
-      }
-    }
-    const blob = new Blob(chunks);
-    formData.append('file', blob, filename || 'file');
+    const body = buildMultipartStream(head, stream, tail);
 
-    // Upload file
-    const response = await this.http.post<FileUploadResponse>('/files', formData);
+    const response = await this.http.postStream<FileUploadResponse>(
+      '/files',
+      body,
+      `multipart/form-data; boundary=${boundary}`
+    );
 
     if (response.error) {
       throw new ValidationError(response.error);
@@ -184,4 +186,39 @@ export class FilesAPI {
 
     return filename;
   }
+}
+
+/**
+ * Wrap a Node.js Readable stream as a Web ReadableStream that prepends
+ * `head` bytes and appends `tail` bytes — used to build streaming
+ * multipart bodies without buffering the source.
+ */
+export function buildMultipartStream(
+  head: Buffer,
+  source: NodeJS.ReadableStream,
+  tail: Buffer
+): ReadableStream<Uint8Array> {
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(new Uint8Array(head));
+      source.on('data', (chunk: Buffer | string) => {
+        const buf = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
+        controller.enqueue(new Uint8Array(buf));
+      });
+      source.on('end', () => {
+        controller.enqueue(new Uint8Array(tail));
+        controller.close();
+      });
+      source.on('error', (err) => {
+        controller.error(err);
+      });
+    },
+    cancel() {
+      (source as Readable).destroy?.();
+    },
+  });
+}
+
+export function sanitizeFilename(name: string): string {
+  return name.replace(/[\r\n"\\]/g, '_');
 }

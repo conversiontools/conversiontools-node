@@ -206,7 +206,7 @@ export class ConversionToolsClient {
     return new Task(
       {
         id: taskId,
-        type: '', // Type not available from status response
+        type: response.type ?? '',
         status: response.status,
         fileId: response.file_id,
         error: response.error,

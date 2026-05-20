@@ -538,6 +538,8 @@ interface WaitOptions {
  */
 interface TaskStatusResponse {
     error: string | null;
+    /** Conversion type (added in API 1.38.5; absent on older deployments) */
+    type?: string;
     status: TaskStatus;
     file_id: string | null;
     conversionProgress: number;
@@ -658,6 +660,14 @@ declare class HttpClient {
      * Make a POST request
      */
     post<T = any>(path: string, body?: any, options?: Partial<RequestOptions>): Promise<T>;
+    /**
+     * POST a streaming body (e.g. multipart upload).
+     *
+     * Bypasses the retry wrapper because a consumed ReadableStream cannot be
+     * replayed. Use this for chunked uploads where buffering the whole body
+     * in memory is unacceptable.
+     */
+    postStream<T = any>(path: string, body: ReadableStream<Uint8Array>, contentType: string, extraHeaders?: Record<string, string>): Promise<T>;
 }
 
 /**
@@ -682,7 +692,10 @@ declare class FilesAPI {
     private readonly http;
     constructor(http: HttpClient);
     /**
-     * Upload a file from various sources
+     * Upload a file from various sources.
+     *
+     * Streams the upload chunked to the API — never buffers the entire file
+     * in memory. Safe for arbitrarily large inputs.
      */
     upload(input: string | NodeJS.ReadableStream | Buffer, options?: FileUploadOptions): Promise<string>;
     /**

@@ -145,6 +145,8 @@ export interface WaitOptions {
  */
 export interface TaskStatusResponse {
   error: string | null;
+  /** Conversion type (added in API 1.38.5; absent on older deployments) */
+  type?: string;
   status: TaskStatus;
   file_id: string | null;
   conversionProgress: number;

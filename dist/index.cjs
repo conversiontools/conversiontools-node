@@ -1,5 +1,6 @@
 'use strict';
 
+var crypto = require('crypto');
 var fs = require('fs');
 var path = require('path');
 var stream = require('stream');
@@ -339,6 +340,69 @@ var HttpClient = class {
       ...options
     });
   }
+  /**
+   * POST a streaming body (e.g. multipart upload).
+   *
+   * Bypasses the retry wrapper because a consumed ReadableStream cannot be
+   * replayed. Use this for chunked uploads where buffering the whole body
+   * in memory is unacceptable.
+   */
+  async postStream(path2, body, contentType, extraHeaders) {
+    const url = `${this.config.baseURL}${path2}`;
+    const headers = {
+      Authorization: `Bearer ${this.config.apiToken}`,
+      "Content-Type": contentType,
+      ...extraHeaders
+    };
+    if (this.config.userAgent) {
+      headers["User-Agent"] = this.config.userAgent;
+    }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      this.config.timeout
+    );
+    try {
+      let response;
+      try {
+        response = await fetch(url, {
+          method: "POST",
+          headers,
+          body,
+          signal: controller.signal,
+          // `duplex: "half"` is required by fetch for streaming request bodies
+          duplex: "half"
+        });
+      } catch (error) {
+        if (error.name === "AbortError") {
+          throw new TimeoutError(
+            `Request timed out after ${this.config.timeout}ms`,
+            this.config.timeout
+          );
+        }
+        throw new NetworkError(
+          `Network request failed: ${error.message}`,
+          error
+        );
+      }
+      this.extractRateLimits(response.headers);
+      if (!response.ok) {
+        await this.handleErrorResponse(response);
+      }
+      const data = await response.json();
+      if (data.error) {
+        throw new ConversionToolsError(
+          data.error,
+          "API_ERROR",
+          response.status,
+          data
+        );
+      }
+      return data;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
 };
 
 // src/utils/validation.ts
@@ -449,7 +513,10 @@ var FilesAPI = class {
     this.http = http;
   }
   /**
-   * Upload a file from various sources
+   * Upload a file from various sources.
+   *
+   * Streams the upload chunked to the API — never buffers the entire file
+   * in memory. Safe for arbitrarily large inputs.
    */
   async upload(input, options) {
     let stream$1;
@@ -475,20 +542,24 @@ var FilesAPI = class {
     if (options?.onProgress) {
       stream$1 = trackStreamProgress(stream$1, options.onProgress, fileSize);
     }
-    const formData = new FormData();
-    const chunks = [];
-    for await (const chunk of stream$1) {
-      if (typeof chunk === "string") {
-        chunks.push(new TextEncoder().encode(chunk));
-      } else if (chunk instanceof Buffer) {
-        chunks.push(new Uint8Array(chunk));
-      } else {
-        chunks.push(chunk);
-      }
-    }
-    const blob = new Blob(chunks);
-    formData.append("file", blob, filename || "file");
-    const response = await this.http.post("/files", formData);
+    const boundary = `----conversiontools-${crypto.randomUUID()}`;
+    const head = Buffer.from(
+      `--${boundary}\r
+Content-Disposition: form-data; name="file"; filename="${sanitizeFilename(filename || "file")}"\r
+Content-Type: application/octet-stream\r
+\r
+`,
+      "utf8"
+    );
+    const tail = Buffer.from(`\r
+--${boundary}--\r
+`, "utf8");
+    const body = buildMultipartStream(head, stream$1, tail);
+    const response = await this.http.postStream(
+      "/files",
+      body,
+      `multipart/form-data; boundary=${boundary}`
+    );
     if (response.error) {
       throw new ValidationError(response.error);
     }
@@ -569,6 +640,30 @@ var FilesAPI = class {
     return filename;
   }
 };
+function buildMultipartStream(head, source, tail) {
+  return new ReadableStream({
+    start(controller) {
+      controller.enqueue(new Uint8Array(head));
+      source.on("data", (chunk) => {
+        const buf = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
+        controller.enqueue(new Uint8Array(buf));
+      });
+      source.on("end", () => {
+        controller.enqueue(new Uint8Array(tail));
+        controller.close();
+      });
+      source.on("error", (err) => {
+        controller.error(err);
+      });
+    },
+    cancel() {
+      source.destroy?.();
+    }
+  });
+}
+function sanitizeFilename(name) {
+  return name.replace(/[\r\n"\\]/g, "_");
+}
 
 // src/api/tasks.ts
 var TasksAPI = class {
@@ -849,7 +944,7 @@ var Task = class {
 };
 
 // src/client.ts
-var VERSION = "2.0.4";
+var VERSION = "2.1.0";
 var ConversionToolsClient = class {
   constructor(config) {
     validateApiToken(config.apiToken);
@@ -977,8 +1072,7 @@ var ConversionToolsClient = class {
     return new Task(
       {
         id: taskId,
-        type: "",
-        // Type not available from status response
+        type: response.type ?? "",
         status: response.status,
         fileId: response.file_id,
         error: response.error,

@@ -283,4 +283,78 @@ export class HttpClient {
       ...options,
     });
   }
+
+  /**
+   * POST a streaming body (e.g. multipart upload).
+   *
+   * Bypasses the retry wrapper because a consumed ReadableStream cannot be
+   * replayed. Use this for chunked uploads where buffering the whole body
+   * in memory is unacceptable.
+   */
+  async postStream<T = any>(
+    path: string,
+    body: ReadableStream<Uint8Array>,
+    contentType: string,
+    extraHeaders?: Record<string, string>,
+  ): Promise<T> {
+    const url = `${this.config.baseURL}${path}`;
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${this.config.apiToken}`,
+      'Content-Type': contentType,
+      ...extraHeaders,
+    };
+    if (this.config.userAgent) {
+      headers['User-Agent'] = this.config.userAgent;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      this.config.timeout
+    );
+
+    try {
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          method: 'POST',
+          headers,
+          body,
+          signal: controller.signal,
+          // `duplex: "half"` is required by fetch for streaming request bodies
+          duplex: 'half',
+        } as RequestInit & { duplex: 'half' });
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          throw new TimeoutError(
+            `Request timed out after ${this.config.timeout}ms`,
+            this.config.timeout
+          );
+        }
+        throw new NetworkError(
+          `Network request failed: ${error.message}`,
+          error
+        );
+      }
+
+      this.extractRateLimits(response.headers);
+
+      if (!response.ok) {
+        await this.handleErrorResponse(response);
+      }
+
+      const data = await response.json();
+      if ((data as any).error) {
+        throw new ConversionToolsError(
+          (data as any).error,
+          'API_ERROR',
+          response.status,
+          data
+        );
+      }
+      return data as T;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
 }
