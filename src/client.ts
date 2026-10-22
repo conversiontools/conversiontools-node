@@ -186,6 +186,7 @@ export class ConversionToolsClient {
         id: response.task_id,
         type: String(request.type),
         status: 'PENDING',
+        warnings: response.warnings ?? [],
         defaultPolling: {
           interval: this.config.pollingInterval,
           maxInterval: this.config.maxPollingInterval,

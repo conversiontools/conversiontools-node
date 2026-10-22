@@ -10,6 +10,17 @@ Release announcements with extended notes also live at
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-10-22
+
+### Added
+- `Task.warnings`: what the API reported when it created the task, as
+  `{ code, message, options }` entries. `OPTIONS_IGNORED` names options the
+  converter does not support; `OPTION_VALUE_REPLACED` names values it replaced
+  with the option's default. Empty when the request was taken as sent. Before,
+  these were dropped, so a misspelled option or an unsupported value produced
+  a default-settings conversion with nothing to show for it.
+- `TaskWarning` type, and `warnings?` on `TaskCreateResponse`.
+
 ## [2.1.0] - 2026-05-20
 
 ### Added
@@ -81,7 +92,8 @@ Release announcements with extended notes also live at
 - Sandbox mode (`sandbox: true`) for testing without consuming quota.
 - Typed error classes for specific failure modes.
 
-[Unreleased]: https://github.com/conversiontools/conversiontools-node/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/conversiontools/conversiontools-node/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/conversiontools/conversiontools-node/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/conversiontools/conversiontools-node/compare/v2.0.4...v2.1.0
 [2.0.4]: https://github.com/conversiontools/conversiontools-node/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/conversiontools/conversiontools-node/compare/v2.0.2...v2.0.3

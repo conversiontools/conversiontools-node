@@ -558,6 +558,17 @@ interface TaskCreateRequest {
     callbackUrl?: string;
 }
 /**
+ * A non-fatal problem with a task's options, reported when the task is created:
+ * an option the converter ignored, or a value replaced with its default.
+ */
+interface TaskWarning {
+    /** e.g. `OPTIONS_IGNORED`, `OPTION_VALUE_REPLACED` */
+    code: string;
+    message: string;
+    /** The option names the warning is about */
+    options: string[];
+}
+/**
  * Task creation response
  */
 interface TaskCreateResponse {
@@ -565,6 +576,8 @@ interface TaskCreateResponse {
     task_id: string;
     sandbox?: boolean;
     message?: string;
+    /** Present only when the API changed or ignored something the request asked for */
+    warnings?: TaskWarning[];
 }
 /**
  * File upload response
@@ -779,6 +792,8 @@ interface TaskOptions {
     error?: string | null;
     /** Conversion progress (0-100) */
     conversionProgress?: number;
+    /** Warnings the API returned when the task was created */
+    warnings?: TaskWarning[];
     /** Default polling configuration */
     defaultPolling?: {
         interval: number;
@@ -789,6 +804,12 @@ interface TaskOptions {
 declare class Task {
     readonly id: string;
     readonly type: string;
+    /**
+     * Options the API ignored or values it replaced with a default when the task
+     * was created. Empty when the request was taken as sent, and for tasks
+     * loaded with `getTask()`.
+     */
+    readonly warnings: readonly TaskWarning[];
     private _status;
     private _fileId;
     private _error;
@@ -992,4 +1013,4 @@ declare class NetworkError extends ConversionToolsError {
     constructor(message: string, originalError?: Error | undefined);
 }
 
-export { type AudioChannels, AuthenticationError, type BackgroundColor, type BaseConversionOptions, type BitDepth, type Bitrate, type ColorMode, type ColorMode3, ConversionError, type ConversionInput, type ConversionOptionsMap, type ConversionProgressEvent, ConversionToolsClient, type ConversionToolsConfig, ConversionToolsError, type ConversionType, type ConvertOptions, type CsvToExcelOptions, type CsvToXmlOptions, type Delimiter, type EbookConversionOptions, type ExcelFormat, type ExcelToCsvOptions, type ExcelToHtmlOptions, type ExcelToOdsOptions, type ExcelToPdfOptions, type ExcelToXmlOptions, type ExcelXmlToExcelXlsxOptions, type FileInfo, FileNotFoundError, type FileUploadOptions, type FileUploadResponse, type FormatJsonOptions, type HeicToJpgOptions, type HtmlTableToCsvOptions, type ImageConversionOptions, type ImageResolution, type ImageToPdfOptions, type InputEncoding, type JsonObjectsToExcelOptions, type JsonToCsvOptions, type JsonToExcelOptions, type JsonToXmlOptions, type JsonToYamlOptions, type MarkdownConversionOptions, NetworkError, type OcrOptions, type OdsToCsvOptions, type OdsToExcelOptions, type OdsToPdfOptions, type OfficeConversionOptions, type Orientation, type PageSize, type PdfToCsvOptions, type PdfToExcelOptions, type PdfToJpgOptions, type PdfToPngOptions, type PdfToSvgOptions, type PdfToTextOptions, type PrefixAttr, type PrefixText, type ProgressEvent, RateLimitError, type RateLimits, type RemoveExifOptions, type SamplingRate, type Space, type SrtToCsvOptions, type SrtToExcelOptions, Task, type TaskCreateRequest, type TaskCreateResponse, TaskNotFoundError, type TaskStatus, type TaskStatusResponse, TimeoutError, type ToMp3Options, type ToWavOptions, type ToWebpOptions, type UserInfo, type ValidateJsonOptions, ValidationError, type WaitOptions, type WavToFlacOptions, type WebpToImageOptions, type WebsiteToImageOptions, type WebsiteToPdfOptions, type XmlEncoding, type XmlToCsvOptions, type XmlToExcelOptions, type XmlToJsonOptions, type YamlToJsonOptions };
+export { type AudioChannels, AuthenticationError, type BackgroundColor, type BaseConversionOptions, type BitDepth, type Bitrate, type ColorMode, type ColorMode3, ConversionError, type ConversionInput, type ConversionOptionsMap, type ConversionProgressEvent, ConversionToolsClient, type ConversionToolsConfig, ConversionToolsError, type ConversionType, type ConvertOptions, type CsvToExcelOptions, type CsvToXmlOptions, type Delimiter, type EbookConversionOptions, type ExcelFormat, type ExcelToCsvOptions, type ExcelToHtmlOptions, type ExcelToOdsOptions, type ExcelToPdfOptions, type ExcelToXmlOptions, type ExcelXmlToExcelXlsxOptions, type FileInfo, FileNotFoundError, type FileUploadOptions, type FileUploadResponse, type FormatJsonOptions, type HeicToJpgOptions, type HtmlTableToCsvOptions, type ImageConversionOptions, type ImageResolution, type ImageToPdfOptions, type InputEncoding, type JsonObjectsToExcelOptions, type JsonToCsvOptions, type JsonToExcelOptions, type JsonToXmlOptions, type JsonToYamlOptions, type MarkdownConversionOptions, NetworkError, type OcrOptions, type OdsToCsvOptions, type OdsToExcelOptions, type OdsToPdfOptions, type OfficeConversionOptions, type Orientation, type PageSize, type PdfToCsvOptions, type PdfToExcelOptions, type PdfToJpgOptions, type PdfToPngOptions, type PdfToSvgOptions, type PdfToTextOptions, type PrefixAttr, type PrefixText, type ProgressEvent, RateLimitError, type RateLimits, type RemoveExifOptions, type SamplingRate, type Space, type SrtToCsvOptions, type SrtToExcelOptions, Task, type TaskCreateRequest, type TaskCreateResponse, TaskNotFoundError, type TaskStatus, type TaskStatusResponse, type TaskWarning, TimeoutError, type ToMp3Options, type ToWavOptions, type ToWebpOptions, type UserInfo, type ValidateJsonOptions, ValidationError, type WaitOptions, type WavToFlacOptions, type WebpToImageOptions, type WebsiteToImageOptions, type WebsiteToPdfOptions, type XmlEncoding, type XmlToCsvOptions, type XmlToExcelOptions, type XmlToJsonOptions, type YamlToJsonOptions };

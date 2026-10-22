@@ -3,10 +3,11 @@
  */
 
 import type {
+  ProgressEvent,
   TaskStatus,
   TaskStatusResponse,
+  TaskWarning,
   WaitOptions,
-  ProgressEvent,
 } from '../types/config.js';
 import { TasksAPI } from '../api/tasks.js';
 import { FilesAPI } from '../api/files.js';
@@ -32,6 +33,9 @@ export interface TaskOptions {
   /** Conversion progress (0-100) */
   conversionProgress?: number;
 
+  /** Warnings the API returned when the task was created */
+  warnings?: TaskWarning[];
+
   /** Default polling configuration */
   defaultPolling?: {
     interval: number;
@@ -43,6 +47,12 @@ export interface TaskOptions {
 export class Task {
   readonly id: string;
   readonly type: string;
+  /**
+   * Options the API ignored or values it replaced with a default when the task
+   * was created. Empty when the request was taken as sent, and for tasks
+   * loaded with `getTask()`.
+   */
+  readonly warnings: readonly TaskWarning[];
 
   private _status: TaskStatus;
   private _fileId: string | null;
@@ -64,6 +74,7 @@ export class Task {
   ) {
     this.id = options.id;
     this.type = options.type;
+    this.warnings = options.warnings ?? [];
     this._status = options.status || 'PENDING';
     this._fileId = options.fileId || null;
     this._error = options.error || null;

@@ -136,6 +136,45 @@ describe('ConversionToolsClient', () => {
     });
   });
 
+  describe('createTask warnings', () => {
+    it('exposes the warnings the API returned for the new task', async () => {
+      const client = new ConversionToolsClient({ apiToken: mockApiToken });
+      const warnings = [{
+        code: 'OPTION_VALUE_REPLACED',
+        message: 'These option values are not supported for convert.xml_to_csv and were replaced with the default: delimiter -> comma.',
+        options: ['delimiter'],
+      }];
+      vi.spyOn(client.tasks, 'create').mockResolvedValue({ error: null, task_id: 'b'.repeat(32), warnings });
+
+      const task = await client.createTask({ type: 'convert.xml_to_csv', options: { delimiter: 'arrow' } });
+
+      expect(task.warnings).toEqual(warnings);
+    });
+
+    it('has no warnings when the API returned none', async () => {
+      const client = new ConversionToolsClient({ apiToken: mockApiToken });
+      vi.spyOn(client.tasks, 'create').mockResolvedValue({ error: null, task_id: 'b'.repeat(32) });
+
+      const task = await client.createTask({ type: 'convert.xml_to_csv', options: {} });
+
+      expect(task.warnings).toEqual([]);
+    });
+
+    it('has no warnings on a task loaded by id', async () => {
+      const client = new ConversionToolsClient({ apiToken: mockApiToken });
+      vi.spyOn(client.tasks, 'getStatus').mockResolvedValue({
+        error: null,
+        status: 'SUCCESS',
+        file_id: 'c'.repeat(32),
+        conversionProgress: 100,
+      });
+
+      const task = await client.getTask('b'.repeat(32));
+
+      expect(task.warnings).toEqual([]);
+    });
+  });
+
   describe('API Token Validation', () => {
     it('should reject empty token', () => {
       expect(() => new ConversionToolsClient({ apiToken: '' }))

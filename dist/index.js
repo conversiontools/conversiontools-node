@@ -761,6 +761,7 @@ var Task = class {
   constructor(options, tasksAPI, filesAPI) {
     this.id = options.id;
     this.type = options.type;
+    this.warnings = options.warnings ?? [];
     this._status = options.status || "PENDING";
     this._fileId = options.fileId || null;
     this._error = options.error || null;
@@ -921,7 +922,7 @@ var Task = class {
 };
 
 // src/client.ts
-var VERSION = "2.1.0";
+var VERSION = "2.2.0";
 var ConversionToolsClient = class {
   constructor(config) {
     validateApiToken(config.apiToken);
@@ -1031,6 +1032,7 @@ var ConversionToolsClient = class {
         id: response.task_id,
         type: String(request.type),
         status: "PENDING",
+        warnings: response.warnings ?? [],
         defaultPolling: {
           interval: this.config.pollingInterval,
           maxInterval: this.config.maxPollingInterval,

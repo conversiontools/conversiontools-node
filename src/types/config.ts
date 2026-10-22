@@ -167,6 +167,18 @@ export interface TaskCreateRequest {
 }
 
 /**
+ * A non-fatal problem with a task's options, reported when the task is created:
+ * an option the converter ignored, or a value replaced with its default.
+ */
+export interface TaskWarning {
+  /** e.g. `OPTIONS_IGNORED`, `OPTION_VALUE_REPLACED` */
+  code: string;
+  message: string;
+  /** The option names the warning is about */
+  options: string[];
+}
+
+/**
  * Task creation response
  */
 export interface TaskCreateResponse {
@@ -174,6 +186,8 @@ export interface TaskCreateResponse {
   task_id: string;
   sandbox?: boolean;
   message?: string;
+  /** Present only when the API changed or ignored something the request asked for */
+  warnings?: TaskWarning[];
 }
 
 /**
