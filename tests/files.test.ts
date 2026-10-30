@@ -261,6 +261,77 @@ describe('FilesAPI', () => {
 
       expect(text).toMatch(/filename="na_me\.txt"/);
     });
+
+    describe('filename option', () => {
+      const readHead = async (): Promise<string> => {
+        const [, body] = mockHttpClient.postStream.mock.calls[0];
+        const reader = (body as ReadableStream<Uint8Array>).getReader();
+        const chunks: Uint8Array[] = [];
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (value) chunks.push(value);
+        }
+        return Buffer.concat(chunks.map((c) => Buffer.from(c))).toString('utf8');
+      };
+
+      beforeEach(() => {
+        mockHttpClient.postStream.mockResolvedValue({
+          error: null,
+          file_id: '12345678901234567890123456789012',
+        });
+      });
+
+      it('sends "file" for a Buffer without a filename', async () => {
+        await filesAPI.upload(Buffer.from('<html></html>'));
+
+        expect(await readHead()).toMatch(/filename="file"\r\n/);
+      });
+
+      it('sends the given filename for a Buffer', async () => {
+        await filesAPI.upload(Buffer.from('<html></html>'), {
+          filename: 'Wedding Invitation - Modern.html',
+        });
+
+        expect(await readHead()).toMatch(/filename="Wedding Invitation - Modern\.html"\r\n/);
+      });
+
+      it('sends the given filename for a stream', async () => {
+        await filesAPI.upload(Readable.from(Buffer.from('a,b\n1,2\n')), {
+          filename: 'report.csv',
+        });
+
+        expect(await readHead()).toMatch(/filename="report\.csv"\r\n/);
+      });
+
+      it('uses the given filename instead of the path basename', async () => {
+        vi.mocked(fs.existsSync).mockReturnValue(true);
+        vi.mocked(fs.statSync).mockReturnValue({ isFile: () => true, size: 4 } as any);
+        vi.mocked(fs.createReadStream).mockReturnValue(Readable.from(Buffer.from('data')) as any);
+
+        await filesAPI.upload('tmp-123.html', { filename: 'Invoice 42.html' });
+
+        expect(await readHead()).toMatch(/filename="Invoice 42\.html"\r\n/);
+      });
+
+      it('sends a non-ASCII filename as UTF-8', async () => {
+        await filesAPI.upload(Buffer.from('<html></html>'), {
+          filename: 'Einladung – Müller.html',
+        });
+
+        expect(await readHead()).toContain('filename="Einladung – Müller.html"\r\n');
+      });
+
+      it('cannot break out of the Content-Disposition header', async () => {
+        await filesAPI.upload(Buffer.from('x'), {
+          filename: 'a"\r\nContent-Type: text/html\r\n\r\nb.html',
+        });
+
+        const text = await readHead();
+        expect(text).toContain('filename="a___Content-Type: text/html____b.html"\r\n');
+        expect(text.match(/\r\nContent-Type: /g)).toHaveLength(1);
+      });
+    });
   });
 
   describe('buildMultipartStream', () => {

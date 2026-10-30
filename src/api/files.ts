@@ -65,7 +65,7 @@ export class FilesAPI {
     const boundary = `----conversiontools-${randomUUID()}`;
     const head = Buffer.from(
       `--${boundary}\r\n` +
-        `Content-Disposition: form-data; name="file"; filename="${sanitizeFilename(filename || 'file')}"\r\n` +
+        `Content-Disposition: form-data; name="file"; filename="${sanitizeFilename(options?.filename || filename || 'file')}"\r\n` +
         `Content-Type: application/octet-stream\r\n\r\n`,
       'utf8'
     );

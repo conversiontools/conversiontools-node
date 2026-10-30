@@ -54,7 +54,7 @@ export function validateConversionInput(input: ConversionInput): {
 
     // Stream
     if ('stream' in input && input.stream) {
-      return { type: 'stream', value: input.stream };
+      return { type: 'stream', value: input };
     }
 
     // Buffer

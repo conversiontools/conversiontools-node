@@ -411,7 +411,7 @@ function validateConversionInput(input) {
       return { type: "url", value: input.url };
     }
     if ("stream" in input && input.stream) {
-      return { type: "stream", value: input.stream };
+      return { type: "stream", value: input };
     }
     if ("buffer" in input && Buffer.isBuffer(input.buffer)) {
       return { type: "buffer", value: input };
@@ -522,7 +522,7 @@ var FilesAPI = class {
     const boundary = `----conversiontools-${randomUUID()}`;
     const head = Buffer.from(
       `--${boundary}\r
-Content-Disposition: form-data; name="file"; filename="${sanitizeFilename(filename || "file")}"\r
+Content-Disposition: form-data; name="file"; filename="${sanitizeFilename(options?.filename || filename || "file")}"\r
 Content-Type: application/octet-stream\r
 \r
 `,
@@ -922,7 +922,7 @@ var Task = class {
 };
 
 // src/client.ts
-var VERSION = "2.2.0";
+var VERSION = "2.3.0";
 var ConversionToolsClient = class {
   constructor(config) {
     validateApiToken(config.apiToken);
@@ -984,12 +984,14 @@ var ConversionToolsClient = class {
           onProgress: this.config.onUploadProgress
         });
       } else if (inputInfo.type === "stream") {
-        fileId = await this.files.upload(inputInfo.value, {
-          onProgress: this.config.onUploadProgress
+        fileId = await this.files.upload(inputInfo.value.stream, {
+          onProgress: this.config.onUploadProgress,
+          filename: inputInfo.value.filename
         });
       } else if (inputInfo.type === "buffer") {
         fileId = await this.files.upload(inputInfo.value.buffer, {
-          onProgress: this.config.onUploadProgress
+          onProgress: this.config.onUploadProgress,
+          filename: inputInfo.value.filename
         });
       }
       if (fileId) {

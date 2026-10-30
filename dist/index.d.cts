@@ -487,6 +487,7 @@ type ConversionInput = string | {
     url: string;
 } | {
     stream: NodeJS.ReadableStream;
+    filename?: string;
 } | {
     buffer: Buffer;
     filename?: string;
@@ -615,6 +616,13 @@ interface RateLimits {
 interface FileUploadOptions {
     /** Upload progress callback */
     onProgress?: (progress: ProgressEvent) => void;
+    /**
+     * File name stored with the upload. Defaults to the file's basename for a
+     * path and to "file" for a Buffer or stream. Converters that carry the
+     * input name into the result use it, e.g. as the PDF title of
+     * convert.website_to_pdf when the page has no <title>.
+     */
+    filename?: string;
 }
 /**
  * User info response

@@ -241,7 +241,7 @@ Simple conversion method - handles upload, conversion, and download automaticall
 ```typescript
 await client.convert({
   type: 'convert.xml_to_excel',
-  input: './data.xml', // or { url: '...' } or { stream: ... }
+  input: './data.xml', // or { url }, { stream, filename? }, { buffer, filename? }, { fileId }
   output: './result.xlsx',
   options: { /* conversion-specific options */ },
   wait: true, // Wait for completion (default: true)
@@ -295,6 +295,11 @@ Accessible via `client.files`:
 ```typescript
 // Upload file
 const fileId = await client.files.upload('./file.xml');
+
+// Upload a Buffer or stream; without `filename` it is stored as "file"
+const htmlId = await client.files.upload(Buffer.from(html), {
+  filename: 'Invoice 42.html',
+});
 
 // Get file info
 const info = await client.files.getInfo(fileId);

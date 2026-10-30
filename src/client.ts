@@ -121,12 +121,14 @@ export class ConversionToolsClient {
           onProgress: this.config.onUploadProgress,
         });
       } else if (inputInfo.type === 'stream') {
-        fileId = await this.files.upload(inputInfo.value, {
+        fileId = await this.files.upload(inputInfo.value.stream, {
           onProgress: this.config.onUploadProgress,
+          filename: inputInfo.value.filename,
         });
       } else if (inputInfo.type === 'buffer') {
         fileId = await this.files.upload(inputInfo.value.buffer, {
           onProgress: this.config.onUploadProgress,
+          filename: inputInfo.value.filename,
         });
       }
 

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { Readable } from 'stream';
 import { ConversionToolsClient } from '../src/client';
 import { ValidationError } from '../src/utils/errors';
 
@@ -133,6 +134,50 @@ describe('ConversionToolsClient', () => {
       });
 
       expect(capturedOnProgress).toBe(onDownloadProgress);
+    });
+  });
+
+  describe('convert() upload filename', () => {
+    const stubConvert = (client: ConversionToolsClient) => {
+      vi.spyOn(client.tasks, 'create').mockResolvedValue({
+        error: null,
+        task_id: 'b'.repeat(32),
+      });
+      return vi.spyOn(client.files, 'upload').mockResolvedValue('a'.repeat(32));
+    };
+
+    it('passes the filename of a buffer input to the upload', async () => {
+      const client = new ConversionToolsClient({ apiToken: mockApiToken });
+      const uploadSpy = stubConvert(client);
+      const buffer = Buffer.from('<html></html>');
+
+      await client.convert({
+        type: 'convert.website_to_pdf',
+        input: { buffer, filename: 'Wedding Invitation - Modern.html' },
+        wait: false,
+      });
+
+      expect(uploadSpy).toHaveBeenCalledWith(buffer, {
+        onProgress: undefined,
+        filename: 'Wedding Invitation - Modern.html',
+      });
+    });
+
+    it('passes the filename of a stream input to the upload', async () => {
+      const client = new ConversionToolsClient({ apiToken: mockApiToken });
+      const uploadSpy = stubConvert(client);
+      const stream = Readable.from(Buffer.from('a,b\n1,2\n'));
+
+      await client.convert({
+        type: 'convert.csv_to_excel',
+        input: { stream, filename: 'report.csv' },
+        wait: false,
+      });
+
+      expect(uploadSpy).toHaveBeenCalledWith(stream, {
+        onProgress: undefined,
+        filename: 'report.csv',
+      });
     });
   });
 

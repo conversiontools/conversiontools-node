@@ -10,6 +10,20 @@ Release announcements with extended notes also live at
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-30
+
+### Added
+- `filename` option on `FilesAPI.upload()`: the name stored with the upload.
+  A Buffer or stream was always sent as "file", and converters that carry
+  the input name into the result showed it, e.g. a PDF titled "file" from
+  `convert.website_to_pdf` when the HTML has no `<title>`. For a path it
+  replaces the basename.
+- `{ stream, filename? }` input for `convert()`, like `{ buffer, filename? }`.
+
+### Fixed
+- `convert({ input: { buffer, filename } })` dropped `filename`, so the
+  upload was named "file" even though the type accepted a name.
+
 ## [2.2.0] - 2026-10-22
 
 ### Added
