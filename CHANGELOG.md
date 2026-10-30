@@ -10,6 +10,14 @@ Release announcements with extended notes also live at
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-10-30
+
+### Fixed
+- `createTask()` and `convert()` refused every conversion type outside the
+  `convert.` namespace (e.g. `voice.ai_text_to_mp3`) with "Invalid conversion
+  type format" before the request was sent. Any `namespace.name` type now
+  goes to the API, which decides whether it exists.
+
 ## [2.3.0] - 2026-10-30
 
 ### Added

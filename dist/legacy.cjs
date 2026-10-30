@@ -410,9 +410,9 @@ function validateConversionType(type) {
   if (!type || typeof type !== "string") {
     throw new ValidationError("Conversion type is required and must be a string");
   }
-  if (!type.startsWith("convert.")) {
+  if (!/^[a-z0-9_]+(\.[a-z0-9_]+)+$/i.test(type)) {
     throw new ValidationError(
-      `Invalid conversion type format: "${type}". Expected format: "convert.source_to_target"`
+      `Invalid conversion type format: "${type}". Expected format: "namespace.name", e.g. "convert.xml_to_excel"`
     );
   }
 }
@@ -945,7 +945,7 @@ var Task = class {
 };
 
 // src/client.ts
-var VERSION = "2.3.0";
+var VERSION = "2.3.1";
 var ConversionToolsClient = class {
   constructor(config) {
     validateApiToken(config.apiToken);

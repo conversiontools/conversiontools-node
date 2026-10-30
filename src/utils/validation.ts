@@ -13,10 +13,11 @@ export function validateConversionType(type: string): void {
     throw new ValidationError('Conversion type is required and must be a string');
   }
 
-  // Check if it follows the pattern convert.source_to_target
-  if (!type.startsWith('convert.')) {
+  // A namespace and a name, e.g. convert.xml_to_excel or voice.ai_text_to_mp3.
+  // Which types exist is the API's call, so any namespace passes here.
+  if (!/^[a-z0-9_]+(\.[a-z0-9_]+)+$/i.test(type)) {
     throw new ValidationError(
-      `Invalid conversion type format: "${type}". Expected format: "convert.source_to_target"`
+      `Invalid conversion type format: "${type}". Expected format: "namespace.name", e.g. "convert.xml_to_excel"`
     );
   }
 }

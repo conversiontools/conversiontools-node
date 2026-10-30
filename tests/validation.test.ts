@@ -34,9 +34,23 @@ describe('Validation Utilities', () => {
       expect(() => validateConversionType('')).toThrow(ValidationError);
     });
 
-    it('should reject type without convert. prefix', () => {
+    it('should accept types outside the convert namespace', () => {
+      expect(() => validateConversionType('voice.ai_text_to_mp3')).not.toThrow();
+      expect(() => validateConversionType('parse.ai_pdf_to_json')).not.toThrow();
+      expect(() => validateConversionType('convert.ai.custom_run')).not.toThrow();
+      expect(() => validateConversionType('convert.0123456789abcdef0123456789abcdef')).not.toThrow();
+    });
+
+    it('should reject type without a namespace', () => {
       expect(() => validateConversionType('xml_to_excel')).toThrow(ValidationError);
       expect(() => validateConversionType('xml_to_excel')).toThrow('Invalid conversion type format');
+    });
+
+    it('should reject malformed types', () => {
+      expect(() => validateConversionType('convert.')).toThrow(ValidationError);
+      expect(() => validateConversionType('.xml_to_excel')).toThrow(ValidationError);
+      expect(() => validateConversionType('convert..xml_to_excel')).toThrow(ValidationError);
+      expect(() => validateConversionType('convert.xml to excel')).toThrow(ValidationError);
     });
 
     it('should reject non-string types', () => {

@@ -52,6 +52,27 @@ describe('TasksAPI', () => {
       );
     });
 
+    it('should send a type from another namespace to the API', async () => {
+      mockHttpClient.post.mockResolvedValue({
+        error: null,
+        task_id: '12345678901234567890123456789012',
+        status: 'pending',
+      });
+
+      await tasksAPI.create({
+        type: 'voice.ai_text_to_mp3',
+        options: { file_id: '12345678901234567890123456789012' },
+      });
+
+      expect(mockHttpClient.post).toHaveBeenCalledWith(
+        '/tasks',
+        JSON.stringify({
+          type: 'voice.ai_text_to_mp3',
+          options: { file_id: '12345678901234567890123456789012' },
+        })
+      );
+    });
+
     it('should create task with webhook URL', async () => {
       mockHttpClient.post.mockResolvedValue({
         error: null,
